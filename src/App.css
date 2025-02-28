@@ -1,38 +1,282 @@
-.App {
-  text-align: center;
+@import './styles/variables.css';
+@import './styles/reset.css';
+@import './styles/animations.css';
+
+:root {
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Roboto Mono', monospace;
+  
+  --color-primary: #5c6cff;
+  --color-primary-dark: #4556ff;
+  --color-primary-light: #8a96ff;
+  --color-secondary: #ff7d54;
+  --color-accent: #54c7ff;
+  
+  --color-bg-primary: #121721;
+  --color-bg-secondary: #181e2a;
+  --color-bg-tertiary: #1e2433;
+  
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b8c0cc;
+  --color-text-tertiary: #7a8499;
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  --border-radius-sm: 6px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 20px;
+  --border-radius-full: 9999px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+  font-family: var(--font-primary);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  overflow-x: hidden;
+  line-height: 1.6;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.app {
+  min-height: 100vh;
+  position: relative;
 }
 
-.App-header {
-  background-color: #282c34;
+.content-wrapper {
+  position: relative;
+  z-index: 2;
+  padding: 0 20px;
+  max-width: 1440px;
+  margin: 0 auto;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding: 40px 0;
+}
+
+/* Loading screen styles */
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-bg-primary);
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  z-index: 100;
+}
+
+.logo-container {
+  text-align: center;
+  animation: fadeIn 0.5s ease;
+}
+
+.logo-text {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+
+.loading-bar {
+  width: 200px;
+  height: 4px;
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--border-radius-full);
+  overflow: hidden;
+}
+
+.loading-progress {
+  height: 100%;
+  width: 30%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  border-radius: var(--border-radius-full);
+  animation: loading 1.5s ease infinite;
+}
+
+/* Button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: var(--border-radius-md);
+  transition: all var(--transition-normal);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+  transform: translateY(-100%);
+  transition: transform 0.6s ease;
+}
+
+.btn:hover:after {
+  transform: translateY(100%);
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
   color: white;
+  box-shadow: 0 4px 12px rgba(92, 108, 255, 0.3);
 }
 
-.App-link {
-  color: #61dafb;
+.btn-primary:hover {
+  box-shadow: 0 6px 16px rgba(92, 108, 255, 0.4);
+  transform: translateY(-2px);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(92, 108, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--border-radius-full);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-primary);
+  transition: all var(--transition-normal);
+}
+
+.btn-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.btn-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Card styles */
+.card {
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Form elements */
+.input-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.input, .select {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  font-size: 1rem;
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-md);
+  color: var(--color-text-primary);
+  transition: all var(--transition-normal);
+}
+
+.input:focus, .select:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(92, 108, 255, 0.2);
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* Container classes */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section {
+  padding: 5rem 0;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 3rem;
+  max-width: 600px;
+}
+
+/* Responsive classes */
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 2rem;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .main-content {
+    padding: 20px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-title {
+    font-size: 1.75rem;
+  }
+  
+  .logo-text {
+    font-size: 2rem;
   }
 }

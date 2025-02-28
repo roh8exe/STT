@@ -1,0 +1,31 @@
+:root {
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'Roboto Mono', monospace;
+    
+    --color-primary: #5c6cff;
+    --color-primary-dark: #4556ff;
+    --color-primary-light: #8a96ff;
+    --color-secondary: #ff7d54;
+    --color-accent: #54c7ff;
+    
+    --color-bg-primary: #121721;
+    --color-bg-secondary: #181e2a;
+    --color-bg-tertiary: #1e2433;
+    
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #b8c0cc;
+    --color-text-tertiary: #7a8499;
+    
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+    
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    --border-radius-sm: 6px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 20px;
+    --border-radius-full: 9999px;
+  }

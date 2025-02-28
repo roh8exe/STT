@@ -1,0 +1,216 @@
+.transcription-result {
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .result-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+  
+  .result-stats {
+    display: flex;
+    gap: 1.5rem;
+  }
+  
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--color-text-tertiary);
+    margin-bottom: 0.25rem;
+  }
+  
+  .stat-value {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+  
+  .result-tabs {
+    display: flex;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .result-tab {
+    padding: 0.75rem 1.25rem;
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    position: relative;
+  }
+  
+  .result-tab:after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -1px;
+    left: 0;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    transition: width var(--transition-normal);
+  }
+  
+  .result-tab:hover {
+    color: var(--color-text-primary);
+  }
+  
+  .result-tab.active {
+    color: var(--color-primary);
+  }
+  
+  .result-tab.active:after {
+    width: 100%;
+  }
+  
+  .result-content {
+    background-color: var(--color-bg-tertiary);
+    border-radius: var(--border-radius-md);
+    padding: 1.5rem;
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    color: var(--color-text-primary);
+  }
+  
+  .result-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .btn-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    position: relative;
+  }
+  
+  .btn-icon:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: var(--color-text-primary);
+    transform: translateY(-2px);
+  }
+  
+  .btn-icon.copied {
+    background-color: rgba(92, 108, 255, 0.2);
+    color: var(--color-primary);
+  }
+  
+  .tooltip {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .btn-icon:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+    bottom: -25px;
+  }
+  
+  /* Scrollbar styling for the result content */
+  .result-content::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .result-content::-webkit-scrollbar-track {
+    background: var(--color-bg-tertiary);
+    border-radius: 3px;
+  }
+  
+  .result-content::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+  }
+  
+  .result-content::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  @media (max-width: 768px) {
+    .result-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .result-stats {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .stat {
+      align-items: flex-start;
+    }
+    
+    .result-actions {
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .btn-icon {
+      margin-right: 0.5rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .result-tabs {
+      flex-direction: column;
+    }
+    
+    .result-tab {
+      text-align: left;
+      padding: 0.5rem 0;
+    }
+    
+    .result-tab:after {
+      height: 0;
+    }
+    
+    .result-tab.active {
+      background-color: rgba(92, 108, 255, 0.1);
+      border-radius: var(--border-radius-sm);
+      padding: 0.5rem 1rem;
+    }
+  }

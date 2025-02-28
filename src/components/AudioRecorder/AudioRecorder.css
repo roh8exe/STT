@@ -1,0 +1,144 @@
+.audio-recorder {
+    width: 100%;
+    background-color: var(--color-bg-tertiary);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    transition: all var(--transition-normal);
+  }
+  
+  .recorder-container {
+    padding: 1.5rem;
+  }
+  
+  .visualizer-container {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: var(--border-radius-md);
+    height: 160px;
+    padding: 1rem;
+    position: relative;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  
+  .visualizer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 120px;
+    width: 100%;
+    gap: 2px;
+  }
+  
+  .visualizer-bar {
+    flex: 1;
+    background: linear-gradient(to top, var(--color-primary), var(--color-accent));
+    border-radius: 2px;
+    min-height: 2px;
+    transition: height 0.1s ease;
+  }
+  
+  .visualizer-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-tertiary);
+    font-size: 1rem;
+  }
+  
+  .recording-timer {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .recording-indicator {
+    width: 10px;
+    height: 10px;
+    background-color: #ff4c4c;
+    border-radius: 50%;
+    animation: pulse 1s infinite;
+  }
+  
+  .recorder-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .btn-record, .btn-stop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: all var(--transition-normal);
+  }
+  
+  .btn-record {
+    background-color: rgba(255, 76, 76, 0.1);
+    color: #ff4c4c;
+  }
+  
+  .btn-record:hover {
+    background-color: rgba(255, 76, 76, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .btn-stop {
+    background-color: rgba(92, 108, 255, 0.1);
+    color: var(--color-primary);
+  }
+  
+  .btn-stop:hover {
+    background-color: rgba(92, 108, 255, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .recording-preview {
+    padding: 1.5rem;
+  }
+  
+  .audio-player {
+    margin-bottom: 1.5rem;
+  }
+  
+  .audio-player audio {
+    width: 100%;
+    border-radius: var(--border-radius-md);
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+  
+  .recording-actions {
+    display: flex;
+    justify-content: center;
+  }
+  
+  @media (max-width: 480px) {
+    .visualizer-container {
+      height: 120px;
+    }
+    
+    .visualizer {
+      height: 80px;
+    }
+  }

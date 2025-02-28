@@ -1,0 +1,216 @@
+.translation-options {
+    margin-bottom: 2rem;
+  }
+  
+  .language-selection-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .language-selection {
+    flex: 1;
+  }
+  
+  .language-selection h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+    color: var(--color-text-secondary);
+  }
+  
+  .language-swap {
+    display: flex;
+    align-items: center;
+    padding-top: 2rem;
+  }
+  
+  .swap-button {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius-full);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    border: none;
+  }
+  
+  .swap-button:hover {
+    background-color: rgba(92, 108, 255, 0.1);
+    color: var(--color-primary);
+    transform: scale(1.05);
+  }
+  
+  .swap-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .quick-languages {
+    margin-bottom: 1.5rem;
+  }
+  
+  .quick-languages h4 {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+    color: var(--color-text-secondary);
+  }
+  
+  .quick-language-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  
+  .quick-language-option {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius-md);
+    border: 1px solid transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    transition: all var(--transition-normal);
+    cursor: pointer;
+  }
+  
+  .quick-language-option:hover {
+    background-color: rgba(92, 108, 255, 0.05);
+    color: var(--color-text-primary);
+  }
+  
+  .quick-language-option.active {
+    background-color: rgba(92, 108, 255, 0.1);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+  
+  .language-flag {
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+  }
+  
+  .advanced-options {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.5rem;
+  }
+  
+  .advanced-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.5rem 0;
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color var(--transition-normal);
+  }
+  
+  .advanced-toggle:hover {
+    color: var(--color-primary);
+  }
+  
+  .advanced-toggle svg {
+    transition: transform var(--transition-normal);
+  }
+  
+  .advanced-settings {
+    margin-top: 1rem;
+    padding: 1.5rem;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-md);
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .settings-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .settings-group:last-child {
+    margin-bottom: 0;
+  }
+  
+  .settings-group h4 {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+    color: var(--color-text-secondary);
+  }
+  
+  .radio-group, .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .radio-label, .checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: color var(--transition-normal);
+  }
+  
+  .radio-label:hover, .checkbox-label:hover {
+    color: var(--color-text-primary);
+  }
+  
+  .radio-label input, .checkbox-label input {
+    margin-right: 0.5rem;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+  }
+  
+  .select-dropdown {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-md);
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    transition: all var(--transition-normal);
+    cursor: pointer;
+  }
+  
+  .select-dropdown:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(92, 108, 255, 0.2);
+  }
+  
+  @media (max-width: 768px) {
+    .language-selection-container {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    .language-swap {
+      padding: 0;
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .quick-language-options {
+      justify-content: center;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .radio-group, .checkbox-group {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }

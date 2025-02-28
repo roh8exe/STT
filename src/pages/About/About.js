@@ -114,30 +114,30 @@ const About = () => {
         <div className="team-grid">
           <div className={`team-member ${isAnimated ? 'animate-fade-in-up delay-400' : ''}`}>
             <div className="member-photo member-photo-1"></div>
-            <h3>Sarah Johnson</h3>
-            <p className="member-title">CEO & Co-Founder</p>
-            <p className="member-bio">Former ML researcher at Google, with a passion for language technology and AI accessibility.</p>
+            <h3></h3>
+            <p className="member-title"></p>
+            <p className="member-bio"></p>
           </div>
           
           <div className={`team-member ${isAnimated ? 'animate-fade-in-up delay-500' : ''}`}>
             <div className="member-photo member-photo-2"></div>
-            <h3>Michael Chen</h3>
-            <p className="member-title">CTO & Co-Founder</p>
-            <p className="member-bio">Audio processing expert with 10+ years of experience developing speech recognition systems.</p>
+            <h3></h3>
+            <p className="member-title"></p>
+            <p className="member-bio"></p>
           </div>
           
           <div className={`team-member ${isAnimated ? 'animate-fade-in-up delay-600' : ''}`}>
             <div className="member-photo member-photo-3"></div>
-            <h3>Priya Patel</h3>
-            <p className="member-title">Head of AI Research</p>
-            <p className="member-bio">PhD in Computational Linguistics with a focus on low-resource languages and neural translation models.</p>
+            <h3></h3>
+            <p className="member-title"></p>
+            <p className="member-bio"></p>
           </div>
           
           <div className={`team-member ${isAnimated ? 'animate-fade-in-up delay-700' : ''}`}>
             <div className="member-photo member-photo-4"></div>
-            <h3>David Kim</h3>
-            <p className="member-title">Lead Designer</p>
-            <p className="member-bio">UX specialist with a background in accessibility and designing for global audiences.</p>
+            <h3></h3>
+            <p className="member-title"></p>
+            <p className="member-bio"></p>
           </div>
         </div>
       </section>

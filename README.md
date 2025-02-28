@@ -1,72 +1,105 @@
-# STT
-# Getting Started with Create React App
+# VoiceTranscribe - Speech-to-Text Translation App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+VoiceTranscribe is a modern React application that provides powerful speech-to-text capabilities with translation features. This application allows users to record audio directly through their browser or upload audio files, then transcribes the content into text and offers translation into multiple languages.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- Real-time speech recognition
+- Audio file upload and processing
+- Support for 100+ languages
+- Seamless translation between languages
+- Interactive UI with smooth animations
+- Responsive design for all devices
 
-### `npm start`
+## Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- React.js
+- React Router
+- HTML5 Web Audio API
+- CSS3 with custom animations
+- Modern JavaScript (ES6+)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Project Structure
 
-### `npm test`
+```
+speech-to-text-translator/
+├── public/
+│   ├── index.html
+│   ├── favicon.ico
+│   └── assets/
+│       ├── images/
+│       └── fonts/
+├── src/
+│   ├── components/
+│   │   ├── Header/
+│   │   ├── Footer/
+│   │   ├── AudioRecorder/
+│   │   ├── AudioUploader/
+│   │   ├── LanguageSelector/
+│   │   ├── TranscriptionResult/
+│   │   ├── TranslationOptions/
+│   │   └── AnimatedBackground/
+│   ├── pages/
+│   │   ├── Home/
+│   │   ├── About/
+│   │   └── Features/
+│   ├── utils/
+│   │   ├── audioHelpers.js
+│   │   └── languageUtils.js
+│   ├── hooks/
+│   │   └── useAudioRecording.js
+│   ├── animations/
+│   │   ├── transitions.js
+│   │   └── animationHelpers.js
+│   ├── styles/
+│   │   ├── variables.css
+│   │   ├── global.css
+│   │   ├── animations.css
+│   │   └── reset.css
+│   ├── App.js
+│   ├── App.css
+│   ├── index.js
+│   └── index.css
+└── package.json
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Getting Started
 
-### `npm run build`
+1. Clone the repository
+   ```
+   git clone https://github.com/roh8exe/STT.git
+   cd STT
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2. Install dependencies
+   ```
+   npm install
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. Run the development server
+   ```
+   npm start
+   ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+4. Build for production
+   ```
+   npm run build
+   ```
 
-### `npm run eject`
+## AI Integration
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+This application is designed to easily integrate with your AI model for speech recognition and translation. The UI is fully prepared to connect with any backend service that provides these capabilities.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+To integrate your AI model:
+1. Update the API endpoints in the service files
+2. Configure the appropriate request/response handling
+3. Set up any necessary authentication
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## License
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Learn More
+## Acknowledgments
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
- 55c397f (Initialize project using Create React App)
+- [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)
+- [React Documentation](https://reactjs.org/docs/getting-started.html)

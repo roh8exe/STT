@@ -3,14 +3,14 @@ import axios from 'axios';
 const API_URL = 'http://127.0.0.1:5000/api';
 
 // Transcribe Audio
-export const transcribeAudio = async (audioBlob, sourceLan = 'auto') => {
+export const transcribeAudio = async (audioBlob, sourceLang = 'auto') => {
   const formData = new FormData();
   
   // Create a File from the audio blob
   const file = new File([audioBlob], "audio.webm", { type: "audio/webm" });
   
   formData.append('audio', file);
-  formData.append('sourceLan', sourceLan); // Ensure key matches Flask backend
+  formData.append('sourceLang', sourceLang); // Ensure key matches Flask backend
 
   try {
     console.log('Sending transcription request to:', `${API_URL}/transcribe`);

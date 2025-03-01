@@ -3,8 +3,7 @@ import AudioRecorder from '../../components/AudioRecorder/AudioRecorder';
 import AudioUploader from '../../components/AudioUploader/AudioUploader';
 import LanguageSelector from '../../components/LanguageSelector/LanguageSelector';
 import TranscriptionResult from '../../components/TranscriptResult/TranscriptionResult';
-import { transcribeAudio } from '../../services/api';
-import { translateText, checkAPIStatus } from '../../services/api';
+import { transcribeAudio, translateText} from '../../services/api';
 import './Home.css';
 
 
@@ -17,15 +16,16 @@ const Home = () => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcriptionResult, setTranscriptionResult] = useState(null);
   const [isAnimated, setIsAnimated] = useState(false);
+  const [transcription, setTranscription] = useState("");
   // Add state for error handling
   const [error, setError] = useState(null);
   const [transcribedText, setTranscribedText] = useState('');
 
   const resetTranscription = () => {
     setTranscribedText('');
+    setTranscriptionResult(null);
   };
-  
-  
+
   // Show animation after initial render
   useEffect(() => {
     setTimeout(() => {
@@ -37,7 +37,8 @@ const Home = () => {
   const handleAudioRecorded = (blob, transcriptionData = null) => {
     setAudioBlob(blob);
     setAudioFile(null);
-    
+
+
     // If AudioRecorder already did transcription, use the result
     if (transcriptionData) {
       setTranscriptionResult({
@@ -45,7 +46,6 @@ const Home = () => {
         translatedText: transcriptionData.transcript, // For now, same as original
         detectedLanguage: transcriptionData.detectedLanguage,
         confidence: 0.95, // Whisper doesn't provide confidence scores
-        duration: 0 // This would be calculated from the audio
       });
     }
   };

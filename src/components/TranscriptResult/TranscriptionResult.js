@@ -67,14 +67,6 @@ const TranscriptionResult = ({ result, sourceLanguage, targetLanguage, onReset }
       <div className="result-header">
         <h3>Transcription Complete</h3>
         <div className="result-stats">
-          <div className="stat">
-            <span className="stat-label">Accuracy</span>
-            <span className="stat-value">{formatAccuracy(result.confidence)}</span>
-          </div>
-          <div className="stat">
-            <span className="stat-label">Duration</span>
-            <span className="stat-value">{formatDuration(result.duration)}</span>
-          </div>
         </div>
       </div>
       

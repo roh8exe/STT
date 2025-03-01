@@ -1,13 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './AudioRecorder.css';
+import { transcribeAudio } from '../../services/api';
 
-const AudioRecorder = ({ onAudioRecorded }) => {
+const AudioRecorder = ({ onAudioRecorded, sourceLan }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioURL, setAudioURL] = useState('');
   const [audioBlob, setAudioBlob] = useState(null);
   const [visualizerData, setVisualizerData] = useState([]);
   
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [transcriptionResult, setTranscriptionResult] = useState(null);
+  const [transcriptionError, setTranscriptionError] = useState(null);
+
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
@@ -22,12 +27,8 @@ const AudioRecorder = ({ onAudioRecorded }) => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
-      
-      // Set canvas dimensions
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
-      
-      // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
   }, []);
@@ -35,21 +36,10 @@ const AudioRecorder = ({ onAudioRecorded }) => {
   // Clean up on component unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-      
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-      
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (streamRef.current) streamRef.current.getTracks().forEach(track => track.stop());
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      if (audioContextRef.current) audioContextRef.current.close();
     };
   }, []);
   
@@ -64,60 +54,42 @@ const AudioRecorder = ({ onAudioRecorded }) => {
       const source = audioContextRef.current.createMediaStreamSource(stream);
       source.connect(analyserRef.current);
       
-      // Configure analyzer
       analyserRef.current.fftSize = 256;
       const bufferLength = analyserRef.current.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
       
-      // Start drawing visualization
       const drawVisualizer = () => {
         if (!isRecording) return;
         
         animationRef.current = requestAnimationFrame(drawVisualizer);
-        
         analyserRef.current.getByteFrequencyData(dataArray);
-        
-        // Normalize and sample the data for visualization
-        const normalizedData = Array.from(dataArray)
-          .filter((_, i) => i % 4 === 0) // Sample every 4th value
-          .map(value => value / 255); // Normalize to 0-1
-        
+        const normalizedData = Array.from(dataArray).filter((_, i) => i % 4 === 0).map(value => value / 255);
         setVisualizerData(normalizedData);
       };
       
       drawVisualizer();
       
-      // Set up media recorder
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
+      let options = {};
+      if (MediaRecorder.isTypeSupported('audio/webm')) options = { mimeType: 'audio/webm' };
+      else if (MediaRecorder.isTypeSupported('audio/mp4')) options = { mimeType: 'audio/mp4' };
+      else if (MediaRecorder.isTypeSupported('audio/ogg')) options = { mimeType: 'audio/ogg' };
       
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
+      mediaRecorderRef.current = new MediaRecorder(stream, options);
+      mediaRecorderRef.current.ondataavailable = event => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
       };
       
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        const audioURL = URL.createObjectURL(audioBlob);
-        
-        setAudioURL(audioURL);
+      mediaRecorderRef.current.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorderRef.current.mimeType });
+        setAudioURL(URL.createObjectURL(audioBlob));
         setAudioBlob(audioBlob);
         onAudioRecorded(audioBlob);
-        
-        // Reset chunks for next recording
         audioChunksRef.current = [];
       };
       
-      // Start recording
-      mediaRecorder.start();
+      mediaRecorderRef.current.start();
       setIsRecording(true);
-      
-      // Start timer
-      timerRef.current = setInterval(() => {
-        setRecordingTime(prevTime => prevTime + 1);
-      }, 1000);
-      
+      timerRef.current = setInterval(() => setRecordingTime(prev => prev + 1), 1000);
     } catch (error) {
       console.error('Error starting recording:', error);
       alert('Failed to access microphone. Please check your permissions.');
@@ -128,17 +100,32 @@ const AudioRecorder = ({ onAudioRecorded }) => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      
-      // Stop timer
       clearInterval(timerRef.current);
+      if (streamRef.current) streamRef.current.getTracks().forEach(track => track.stop());
+      cancelAnimationFrame(animationRef.current);
+    }
+  };
+  
+  const handleTranscribe = async () => {
+    if (!audioBlob) return;
+    
+    setIsTranscribing(true);
+    setTranscriptionError(null);
+    
+    try {
+      const result = await transcribeAudio(audioBlob, sourceLan);
       
-      // Stop all tracks on the stream
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+      if (!result || !result.transcript) {
+        throw new Error('No transcription received.');
       }
       
-      // Stop visualization
-      cancelAnimationFrame(animationRef.current);
+      setTranscriptionResult(result);
+      onAudioRecorded(audioBlob, result);
+    } catch (error) {
+      console.error('Transcription error:', error);
+      setTranscriptionError(error.message || 'Failed to transcribe audio');
+    } finally {
+      setIsTranscribing(false);
     }
   };
   
@@ -147,12 +134,13 @@ const AudioRecorder = ({ onAudioRecorded }) => {
     setAudioBlob(null);
     setRecordingTime(0);
     setVisualizerData([]);
+    setTranscriptionResult(null);
+    setTranscriptionError(null);
   };
   
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    return `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`;
   };
   
   return (
@@ -162,11 +150,7 @@ const AudioRecorder = ({ onAudioRecorded }) => {
           <div className="visualizer-container">
             <div className="visualizer">
               {visualizerData.map((value, index) => (
-                <div 
-                  key={index} 
-                  className="visualizer-bar"
-                  style={{ height: `${value * 100}%` }}
-                ></div>
+                <div key={index} className="visualizer-bar" style={{ height: `${value * 100}%` }}></div>
               ))}
               {!isRecording && !visualizerData.length && (
                 <div className="visualizer-placeholder">
@@ -186,47 +170,40 @@ const AudioRecorder = ({ onAudioRecorded }) => {
           
           <div className="recorder-controls">
             {!isRecording ? (
-              <button 
-                className="btn-record" 
-                onClick={startRecording}
-                aria-label="Start recording"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="8" fill="currentColor"/>
-                </svg>
-                <span>Start Recording</span>
+              <button className="btn-record" onClick={startRecording} aria-label="Start recording">
+                🎤 Start Recording
               </button>
             ) : (
-              <button 
-                className="btn-stop" 
-                onClick={stopRecording}
-                aria-label="Stop recording"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="7" y="7" width="10" height="10" fill="currentColor"/>
-                </svg>
-                <span>Stop Recording</span>
+              <button className="btn-stop" onClick={stopRecording} aria-label="Stop recording">
+                ⏹ Stop Recording
               </button>
             )}
           </div>
         </div>
       ) : (
         <div className="recording-preview">
-          <div className="audio-player">
-            <audio src={audioURL} controls></audio>
-          </div>
-          <div className="recording-actions">
-            <button 
-              className="btn btn-secondary"
-              onClick={resetRecording}
-            >
-              Record Again
-            </button>
-          </div>
+          <audio src={audioURL} controls></audio>
+          {!transcriptionResult ? (
+            <div className="recording-actions">
+              <button className="btn btn-primary" onClick={handleTranscribe} disabled={isTranscribing}>
+                {isTranscribing ? 'Transcribing...' : 'Transcribe Audio'}
+              </button>
+              <button className="btn btn-secondary" onClick={resetRecording} disabled={isTranscribing}>
+                Record Again
+              </button>
+              {transcriptionError && <div className="transcription-error">{transcriptionError}</div>}
+            </div>
+          ) : (
+            <div className="transcription-result">
+              <h4>Transcription Result:</h4>
+              <p>{transcriptionResult.transcript}</p>
+              <button className="btn btn-secondary" onClick={resetRecording}>Record New Audio</button>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
-}
+};
 
 export default AudioRecorder;

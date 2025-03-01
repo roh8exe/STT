@@ -3,7 +3,10 @@ import AudioRecorder from '../../components/AudioRecorder/AudioRecorder';
 import AudioUploader from '../../components/AudioUploader/AudioUploader';
 import LanguageSelector from '../../components/LanguageSelector/LanguageSelector';
 import TranscriptionResult from '../../components/TranscriptResult/TranscriptionResult';
+import { transcribeAudio } from '../../services/api';
+import { translateText, checkAPIStatus } from '../../services/api';
 import './Home.css';
+
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState('record');
@@ -14,6 +17,14 @@ const Home = () => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcriptionResult, setTranscriptionResult] = useState(null);
   const [isAnimated, setIsAnimated] = useState(false);
+  // Add state for error handling
+  const [error, setError] = useState(null);
+  const [transcribedText, setTranscribedText] = useState('');
+
+  const resetTranscription = () => {
+    setTranscribedText('');
+  };
+  
   
   // Show animation after initial render
   useEffect(() => {
@@ -22,9 +33,21 @@ const Home = () => {
     }, 100);
   }, []);
 
-  const handleAudioRecorded = (blob) => {
+  // Update this function to potentially accept transcription results
+  const handleAudioRecorded = (blob, transcriptionData = null) => {
     setAudioBlob(blob);
     setAudioFile(null);
+    
+    // If AudioRecorder already did transcription, use the result
+    if (transcriptionData) {
+      setTranscriptionResult({
+        originalText: transcriptionData.transcript,
+        translatedText: transcriptionData.transcript, // For now, same as original
+        detectedLanguage: transcriptionData.detectedLanguage,
+        confidence: 0.95, // Whisper doesn't provide confidence scores
+        duration: 0 // This would be calculated from the audio
+      });
+    }
   };
 
   const handleAudioUploaded = (file) => {
@@ -40,29 +63,43 @@ const Home = () => {
     setTargetLanguage(lang);
   };
 
-  const handleTranscribe = () => {
-    // This is where you'll integrate your AI model later
+  // Update this to use the real API
+  const handleTranscribe = async () => {
+    if (!audioBlob && !audioFile) return;
+  
     setIsTranscribing(true);
-    
-    // Mock transcription for UI demonstration
-    setTimeout(() => {
-      setIsTranscribing(false);
-      
-      // Sample result
+    setError(null);
+  
+    try {
+      const audioSource = audioBlob || audioFile;
+  
+      // Step 1: Transcribe Audio
+      const result = await transcribeAudio(audioSource, sourceLanguage);
+      const transcribedText = result.transcript;
+  
+      let translatedText = transcribedText; // Default to same text
+  
+      // Step 2: Translate if source and target languages are different
+      if (sourceLanguage !== targetLanguage) {
+        const translationResult = await translateText(transcribedText, sourceLanguage, targetLanguage);
+        translatedText = translationResult.translatedText;
+      }
+  
       setTranscriptionResult({
-        originalText: "This is a sample transcription of the audio in the original language.",
-        translatedText: "This is the translated version of the transcription.",
+        originalText: transcribedText,
+        translatedText: translatedText,
+        detectedLanguage: result.detectedLanguage,
         confidence: 0.95,
-        duration: 12.5
+        duration: result.processingTime || 0
       });
-    }, 3000);
+    } catch (err) {
+      console.error('Transcription error:', err);
+      setError(err.message || 'Failed to transcribe audio');
+    } finally {
+      setIsTranscribing(false);
+    }
   };
-
-  const resetTranscription = () => {
-    setAudioBlob(null);
-    setAudioFile(null);
-    setTranscriptionResult(null);
-  };
+  
 
   return (
     <div className="home-page">
@@ -125,7 +162,10 @@ const Home = () => {
 
               <div className="tab-content">
                 {activeTab === 'record' ? (
-                  <AudioRecorder onAudioRecorded={handleAudioRecorded} />
+                  <AudioRecorder 
+                    onAudioRecorded={handleAudioRecorded} 
+                    sourceLanguage={sourceLanguage}
+                  />
                 ) : (
                   <AudioUploader onAudioUploaded={handleAudioUploaded} />
                 )}
@@ -172,6 +212,13 @@ const Home = () => {
                     "Transcribe Now"
                   )}
                 </button>
+                
+                {/* Display error if any */}
+                {error && (
+                  <div className="transcription-error">
+                    {error}
+                  </div>
+                )}
               </div>
             </>
           ) : (
@@ -186,6 +233,7 @@ const Home = () => {
       </section>
 
       <section id="features" className="features-section">
+        {/* Features section remains unchanged */}
         <div className="section-header">
           <h2 className="section-title">Features</h2>
           <p className="section-subtitle">

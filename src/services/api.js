@@ -44,6 +44,24 @@ export const translateText = async (text, sourceLang, targetLang) => {
   }
 };
 
+// Text to Speech
+export const textToSpeech = async (text, targetLang, voiceType = 'default') => {
+  try {
+    console.log('Sending text-to-speech request to:', `${API_URL}/text-to-speech`);
+    const response = await axios.post(`${API_URL}/text-to-speech`, {
+      text,
+      targetLang,
+      voiceType
+    });
+
+    console.log('Text-to-speech response:', response.data);
+    return response.data; // Backend should return { audioUrl: "..." }
+  } catch (error) {
+    console.error('Error in textToSpeech:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 // API Status Check
 export const checkAPIStatus = async () => {
   try {

@@ -3,29 +3,35 @@ import AudioRecorder from '../../components/AudioRecorder/AudioRecorder';
 import AudioUploader from '../../components/AudioUploader/AudioUploader';
 import LanguageSelector from '../../components/LanguageSelector/LanguageSelector';
 import TranscriptionResult from '../../components/TranscriptResult/TranscriptionResult';
-import { transcribeAudio, translateText} from '../../services/api';
+import { transcribeAudio, translateText, textToSpeech } from '../../services/api';
 import './Home.css';
 
-
 const Home = () => {
+  // State for model selection
+  const [activeModel, setActiveModel] = useState('speech-to-text');
+  
+  // Speech to Text states
   const [activeTab, setActiveTab] = useState('record');
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioFile, setAudioFile] = useState(null);
-  const [sourceLanguage, setSourceLanguage] = useState('auto');
-  const [targetLanguage, setTargetLanguage] = useState('en');
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcriptionResult, setTranscriptionResult] = useState(null);
+  
+  // Text to Speech states
+  const [inputText, setInputText] = useState('');
+  const [isGeneratingSpeech, setIsGeneratingSpeech] = useState(false);
+  const [generatedAudio, setGeneratedAudio] = useState(null);
+  
+  // Speech to Speech states
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translatedAudio, setTranslatedAudio] = useState(null);
+  
+  // Common states
+  const [sourceLanguage, setSourceLanguage] = useState('auto');
+  const [targetLanguage, setTargetLanguage] = useState('en');
   const [isAnimated, setIsAnimated] = useState(false);
-  const [transcription, setTranscription] = useState("");
-  // Add state for error handling
   const [error, setError] = useState(null);
-  const [transcribedText, setTranscribedText] = useState('');
-
-  const resetTranscription = () => {
-    setTranscribedText('');
-    setTranscriptionResult(null);
-  };
-
+  
   // Show animation after initial render
   useEffect(() => {
     setTimeout(() => {
@@ -33,19 +39,20 @@ const Home = () => {
     }, 100);
   }, []);
 
-  // Update this function to potentially accept transcription results
+  const resetTranscription = () => {
+    setTranscriptionResult(null);
+  };
+
   const handleAudioRecorded = (blob, transcriptionData = null) => {
     setAudioBlob(blob);
     setAudioFile(null);
 
-
-    // If AudioRecorder already did transcription, use the result
     if (transcriptionData) {
       setTranscriptionResult({
         originalText: transcriptionData.transcript,
-        translatedText: transcriptionData.transcript, // For now, same as original
+        translatedText: transcriptionData.transcript,
         detectedLanguage: transcriptionData.detectedLanguage,
-        confidence: 0.95, // Whisper doesn't provide confidence scores
+        confidence: 0.95,
       });
     }
   };
@@ -63,7 +70,11 @@ const Home = () => {
     setTargetLanguage(lang);
   };
 
-  // Update this to use the real API
+  const handleInputTextChange = (e) => {
+    setInputText(e.target.value);
+  };
+
+  // Handle speech to text transcription
   const handleTranscribe = async () => {
     if (!audioBlob && !audioFile) return;
   
@@ -72,14 +83,11 @@ const Home = () => {
   
     try {
       const audioSource = audioBlob || audioFile;
-  
-      // Step 1: Transcribe Audio
       const result = await transcribeAudio(audioSource, sourceLanguage);
       const transcribedText = result.transcript;
   
-      let translatedText = transcribedText; // Default to same text
+      let translatedText = transcribedText;
   
-      // Step 2: Translate if source and target languages are different
       if (sourceLanguage !== targetLanguage) {
         const translationResult = await translateText(transcribedText, sourceLanguage, targetLanguage);
         translatedText = translationResult.translatedText;
@@ -99,26 +107,106 @@ const Home = () => {
       setIsTranscribing(false);
     }
   };
-  
+
+  // Handle text to speech generation
+  const handleGenerateSpeech = async () => {
+    if (!inputText) return;
+    
+    setIsGeneratingSpeech(true);
+    setError(null);
+    
+    try {
+      const result = await textToSpeech(inputText, targetLanguage);
+      setGeneratedAudio(result.audioUrl);
+    } catch (err) {
+      console.error('Text to speech error:', err);
+      setError(err.response?.data?.message || err.message || 'Failed to generate speech');
+    } finally {
+      setIsGeneratingSpeech(false);
+    }
+  };
+
+  // Handle speech to speech translation
+  const handleSpeechToSpeech = async () => {
+    if (!audioBlob && !audioFile) return;
+    
+    setIsTranslating(true);
+    setError(null);
+    
+    try {
+      // Step 1: Transcribe the audio
+      const audioSource = audioBlob || audioFile;
+      const transcriptionResult = await transcribeAudio(audioSource, sourceLanguage);
+      
+      // Step 2: Translate the text
+      const translationResult = await translateText(
+        transcriptionResult.transcript, 
+        sourceLanguage, 
+        targetLanguage
+      );
+      
+      // Step 3: Convert translated text to speech
+      const speechResult = await textToSpeech(
+        translationResult.translatedText,
+        targetLanguage
+      );
+      
+      setTranslatedAudio(speechResult.audioUrl);
+      
+      console.log('Speech to speech translation completed with:', {
+        originalText: transcriptionResult.transcript,
+        translatedText: translationResult.translatedText,
+        targetLanguage: targetLanguage
+      });
+    } catch (err) {
+      console.error('Speech to speech error:', err);
+      setError(err.response?.data?.message || err.message || 'Failed to translate speech');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  // Reset everything when switching models
+  const switchModel = (model) => {
+    setActiveModel(model);
+    setError(null);
+    setTranscriptionResult(null);
+    setGeneratedAudio(null);
+    setTranslatedAudio(null);
+    setAudioBlob(null);
+    setAudioFile(null);
+    setInputText('');
+  };
 
   return (
     <div className="home-page">
       <section className="hero-section">
         <div className={`hero-content ${isAnimated ? 'animate-fade-in' : ''}`}>
+          <div className="hero-badges">
+            <span className="hero-badge">AI-Powered</span>
+            <span className="hero-badge">100+ Languages</span>
+            <span className="hero-badge">Real-time</span>
+          </div>
           <h1 className="hero-title">
-            <span className="gradient-text">Transcribe & Translate</span> Your Voice
+            <span className="gradient-text">Voice & Text</span> Translation Suite
           </h1>
           <p className="hero-subtitle">
-            Convert speech to text in any language. Speak, upload, or record —
-            our AI will transcribe and translate with professional accuracy.
+            Our advanced AI models provide seamless conversion between speech and text in multiple languages. 
+            Perfect for meetings, content creation, language learning, and global communication.
           </p>
-          <div className="hero-actions">
-            <a href="#try-now" className="btn btn-primary">
-              Start Now
-            </a>
-            <a href="#features" className="btn btn-secondary">
-              Learn More
-            </a>
+          <div className="hero-stats">
+            <div className="stat-item">
+              <span className="stat-number">100+</span>
+              <span className="stat-label">Languages</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">95%</span>
+              <span className="stat-label">Accuracy</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">24/7</span>
+              <span className="stat-label">Availability</span>
+            </div>
           </div>
         </div>
         <div className={`hero-image ${isAnimated ? 'animate-fade-in delay-300' : ''}`}>
@@ -132,17 +220,178 @@ const Home = () => {
         </div>
       </section>
 
-      <section id="try-now" className="transcription-section">
-        <div className="section-header">
-          <h2 className="section-title">Try It Now</h2>
-          <p className="section-subtitle">
-            Start transcribing your speech in three simple steps
-          </p>
+      <section className="models-section">
+        <div className="model-tabs">
+          <button 
+            className={`model-tab ${activeModel === 'speech-to-text' ? 'active' : ''}`}
+            onClick={() => switchModel('speech-to-text')}
+          >
+            <span className="model-icon">🎤</span>
+            Speech to Text
+          </button>
+          <button 
+            className={`model-tab ${activeModel === 'text-to-speech' ? 'active' : ''}`}
+            onClick={() => switchModel('text-to-speech')}
+          >
+            <span className="model-icon">🔊</span>
+            Text to Speech
+          </button>
+          <button 
+            className={`model-tab ${activeModel === 'speech-to-speech' ? 'active' : ''}`}
+            onClick={() => switchModel('speech-to-speech')}
+          >
+            <span className="model-icon">🗣️</span>
+            Speech to Speech
+          </button>
         </div>
+        
+        <div className="model-container">
+          {/* Speech to Text Model */}
+          {activeModel === 'speech-to-text' && (
+            <div className="transcription-container">
+              {!transcriptionResult ? (
+                <>
+                  <div className="tabs">
+                    <button
+                      className={`tab ${activeTab === 'record' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('record')}
+                    >
+                      <span className="tab-icon">🎙️</span>
+                      Record Audio
+                    </button>
+                    <button
+                      className={`tab ${activeTab === 'upload' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('upload')}
+                    >
+                      <span className="tab-icon">📁</span>
+                      Upload Audio
+                    </button>
+                  </div>
 
-        <div className="transcription-container">
-          {!transcriptionResult ? (
-            <>
+                  <div className="tab-content">
+                    {activeTab === 'record' ? (
+                      <AudioRecorder 
+                        onAudioRecorded={handleAudioRecorded} 
+                        sourceLanguage={sourceLanguage}
+                      />
+                    ) : (
+                      <AudioUploader onAudioUploaded={handleAudioUploaded} />
+                    )}
+                  </div>
+
+                  <div className="language-options">
+                    <div className="language-selection">
+                      <h3>Source Language</h3>
+                      <LanguageSelector
+                        value={sourceLanguage}
+                        onChange={handleSourceLanguageChange}
+                        includeAuto={true}
+                      />
+                    </div>
+                    <div className="language-divider">
+                      <div className="arrow-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="language-selection">
+                      <h3>Target Language</h3>
+                      <LanguageSelector
+                        value={targetLanguage}
+                        onChange={handleTargetLanguageChange}
+                        includeAuto={false}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="action-button">
+                    <button
+                      className="btn btn-primary full-width"
+                      onClick={handleTranscribe}
+                      disabled={!audioBlob && !audioFile}
+                    >
+                      {isTranscribing ? (
+                        <>
+                          <span className="loading-spinner"></span>
+                          Transcribing...
+                        </>
+                      ) : (
+                        "Transcribe Now"
+                      )}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <TranscriptionResult
+                  result={transcriptionResult}
+                  sourceLanguage={sourceLanguage}
+                  targetLanguage={targetLanguage}
+                  onReset={resetTranscription}
+                />
+              )}
+            </div>
+          )}
+
+          {/* Text to Speech Model */}
+          {activeModel === 'text-to-speech' && (
+            <div className="text-to-speech-container">
+              <div className="text-input-section">
+                <h3>Enter text to convert to speech</h3>
+                <textarea
+                  className="text-input"
+                  placeholder="Type or paste text here..."
+                  value={inputText}
+                  onChange={handleInputTextChange}
+                  rows={6}
+                ></textarea>
+              </div>
+
+              <div className="language-options">
+                <div className="language-selection full-width">
+                  <h3>Target Voice Language</h3>
+                  <LanguageSelector
+                    value={targetLanguage}
+                    onChange={handleTargetLanguageChange}
+                    includeAuto={false}
+                  />
+                </div>
+              </div>
+
+              <div className="action-button">
+                <button
+                  className="btn btn-primary full-width"
+                  onClick={handleGenerateSpeech}
+                  disabled={!inputText.trim()}
+                >
+                  {isGeneratingSpeech ? (
+                    <>
+                      <span className="loading-spinner"></span>
+                      Generating Speech...
+                    </>
+                  ) : (
+                    "Generate Speech"
+                  )}
+                </button>
+              </div>
+
+              {generatedAudio && (
+                <div className="audio-result">
+                  <h3>Generated Speech</h3>
+                  <audio controls src={generatedAudio} className="audio-player" />
+                  <div className="action-button mt-4">
+                    <button className="btn btn-secondary full-width" onClick={() => setGeneratedAudio(null)}>
+                      Reset
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Speech to Speech Model */}
+          {activeModel === 'speech-to-speech' && (
+            <div className="speech-to-speech-container">
               <div className="tabs">
                 <button
                   className={`tab ${activeTab === 'record' ? 'active' : ''}`}
@@ -200,44 +449,48 @@ const Home = () => {
               <div className="action-button">
                 <button
                   className="btn btn-primary full-width"
-                  onClick={handleTranscribe}
+                  onClick={handleSpeechToSpeech}
                   disabled={!audioBlob && !audioFile}
                 >
-                  {isTranscribing ? (
+                  {isTranslating ? (
                     <>
                       <span className="loading-spinner"></span>
-                      Transcribing...
+                      Translating Speech...
                     </>
                   ) : (
-                    "Transcribe Now"
+                    "Translate Speech"
                   )}
                 </button>
-                
-                {/* Display error if any */}
-                {error && (
-                  <div className="transcription-error">
-                    {error}
-                  </div>
-                )}
               </div>
-            </>
-          ) : (
-            <TranscriptionResult
-              result={transcriptionResult}
-              sourceLanguage={sourceLanguage}
-              targetLanguage={targetLanguage}
-              onReset={resetTranscription}
-            />
+
+              {translatedAudio && (
+                <div className="audio-result">
+                  <h3>Translated Speech</h3>
+                  <audio controls src={translatedAudio} className="audio-player" />
+                  <div className="action-button mt-4">
+                    <button className="btn btn-secondary full-width" onClick={() => setTranslatedAudio(null)}>
+                      Reset
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Error display (for all models) */}
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
           )}
         </div>
       </section>
 
-      <section id="features" className="features-section">
-        {/* Features section remains unchanged */}
+      <section className="features-section">
         <div className="section-header">
           <h2 className="section-title">Features</h2>
           <p className="section-subtitle">
-            Powerful speech-to-text capabilities at your fingertips
+            Powerful AI voice solutions at your fingertips
           </p>
         </div>
 
@@ -251,8 +504,8 @@ const Home = () => {
                 <path d="M13.3335 31.6665H26.6668" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
             </div>
-            <h3>Real-time Speech Recognition</h3>
-            <p>Experience instantaneous transcription as you speak with our cutting-edge speech recognition technology.</p>
+            <h3>Speech to Text</h3>
+            <p>Convert spoken words to written text with high accuracy, supporting multiple languages and accents.</p>
           </div>
 
           <div className="feature-card">
@@ -263,8 +516,8 @@ const Home = () => {
                 <path d="M16.6667 24.9999L33.3334 8.33325" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <h3>Multi-language Support</h3>
-            <p>Seamlessly translate between 100+ languages, breaking down communication barriers across the globe.</p>
+            <h3>Text to Speech</h3>
+            <p>Transform written content into natural-sounding speech with customizable voices and languages.</p>
           </div>
 
           <div className="feature-card">
@@ -276,8 +529,8 @@ const Home = () => {
                 <path d="M20 16.6667L16.6667 20.0001" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
             </div>
-            <h3>Audio File Upload</h3>
-            <p>Upload pre-recorded audio files in various formats for quick transcription and translation.</p>
+            <h3>Speech to Speech</h3>
+            <p>Instantly translate spoken words from one language to another, preserving tone and context.</p>
           </div>
 
           <div className="feature-card">
@@ -289,8 +542,8 @@ const Home = () => {
                 <path d="M26.6667 16.6667V23.3334" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
             </div>
-            <h3>High Accuracy</h3>
-            <p>Our advanced AI model delivers industry-leading accuracy, even with complex accents and terminology.</p>
+            <h3>Multi-Language Support</h3>
+            <p>Support for 100+ languages, making global communication seamless and accessible to everyone.</p>
           </div>
         </div>
       </section>

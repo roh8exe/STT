@@ -44,15 +44,24 @@ export const translateText = async (text, sourceLang, targetLang) => {
   }
 };
 
-// Text to Speech
-export const textToSpeech = async (text, targetLang, voiceType = 'default') => {
+// Text to Speech - Modified to handle source language parameter
+export const textToSpeech = async (text, targetLang, sourceLang = null, voiceType = 'default') => {
   try {
     console.log('Sending text-to-speech request to:', `${API_URL}/text-to-speech`);
-    const response = await axios.post(`${API_URL}/text-to-speech`, {
+    
+    // Build the request body
+    const requestBody = {
       text,
       targetLang,
       voiceType
-    });
+    };
+    
+    // Add sourceLang to the request only if it's provided and not null
+    if (sourceLang) {
+      requestBody.sourceLang = sourceLang;
+    }
+    
+    const response = await axios.post(`${API_URL}/text-to-speech`, requestBody);
 
     console.log('Text-to-speech response:', response.data);
     return response.data; // Backend should return { audioUrl: "..." }

@@ -32,11 +32,29 @@ const Home = () => {
   const [isAnimated, setIsAnimated] = useState(false);
   const [error, setError] = useState(null);
   
-  // Show animation after initial render
+  // Show animation after initial render and track scroll position
   useEffect(() => {
     setTimeout(() => {
       setIsAnimated(true);
     }, 100);
+    
+    // Add scroll event listener to track steps progress
+    const handleScroll = () => {
+      const modelContainer = document.querySelector('.model-container');
+      if (modelContainer) {
+        const rect = modelContainer.getBoundingClientRect();
+        if (rect.top <= window.innerHeight * 0.5 && rect.bottom >= window.innerHeight * 0.3) {
+          modelContainer.classList.add('in-view');
+        }
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const resetTranscription = () => {
@@ -166,7 +184,7 @@ const Home = () => {
     }
   };
 
-  // Reset everything when switching models
+  // Reset everything when switching models and scroll to the tool
   const switchModel = (model) => {
     setActiveModel(model);
     setError(null);
@@ -176,6 +194,28 @@ const Home = () => {
     setAudioBlob(null);
     setAudioFile(null);
     setInputText('');
+    
+    // Scroll to the model container with smooth animation
+    setTimeout(() => {
+      const container = document.querySelector('.model-container');
+      if (container) {
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
+  // Helper function to render model descriptions
+  const getModelDescription = () => {
+    switch(activeModel) {
+      case 'speech-to-text':
+        return "Convert spoken language into written text. Perfect for transcriptions, note-taking, and accessibility.";
+      case 'text-to-speech':
+        return "Transform written content into natural-sounding speech. Great for content consumption, learning, and accessibility.";
+      case 'speech-to-speech':
+        return "Translate speech from one language to another in real-time. Ideal for multilingual conversations and travel.";
+      default:
+        return "";
+    }
   };
 
   return (
@@ -191,23 +231,8 @@ const Home = () => {
             <span className="gradient-text">Voice & Text</span> Translation Suite
           </h1>
           <p className="hero-subtitle">
-            Our advanced AI models provide seamless conversion between speech and text in multiple languages. 
-            Perfect for meetings, content creation, language learning, and global communication.
+            Convert speech to text, text to speech, or translate between languages with our advanced AI models.
           </p>
-          <div className="hero-stats">
-            <div className="stat-item">
-              <span className="stat-number">100+</span>
-              <span className="stat-label">Languages</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">95%</span>
-              <span className="stat-label">Accuracy</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">24/7</span>
-              <span className="stat-label">Availability</span>
-            </div>
-          </div>
         </div>
         <div className={`hero-image ${isAnimated ? 'animate-fade-in delay-300' : ''}`}>
           <div className="waveform-animation">
@@ -221,28 +246,32 @@ const Home = () => {
       </section>
 
       <section className="models-section">
-        <div className="model-tabs">
-          <button 
-            className={`model-tab ${activeModel === 'speech-to-text' ? 'active' : ''}`}
-            onClick={() => switchModel('speech-to-text')}
-          >
-            <span className="model-icon">🎤</span>
-            Speech to Text
-          </button>
-          <button 
-            className={`model-tab ${activeModel === 'text-to-speech' ? 'active' : ''}`}
-            onClick={() => switchModel('text-to-speech')}
-          >
-            <span className="model-icon">🔊</span>
-            Text to Speech
-          </button>
-          <button 
-            className={`model-tab ${activeModel === 'speech-to-speech' ? 'active' : ''}`}
-            onClick={() => switchModel('speech-to-speech')}
-          >
-            <span className="model-icon">🗣️</span>
-            Speech to Speech
-          </button>
+        <div className="model-selector-container">
+          <h2 className="section-title">Select Your Tool</h2>
+          <div className="model-tabs">
+            <button 
+              className={`model-tab ${activeModel === 'speech-to-text' ? 'active' : ''}`}
+              onClick={() => switchModel('speech-to-text')}
+            >
+              <span className="model-icon">🎤</span>
+              <span className="model-label">Speech to Text</span>
+            </button>
+            <button 
+              className={`model-tab ${activeModel === 'text-to-speech' ? 'active' : ''}`}
+              onClick={() => switchModel('text-to-speech')}
+            >
+              <span className="model-icon">🔊</span>
+              <span className="model-label">Text to Speech</span>
+            </button>
+            <button 
+              className={`model-tab ${activeModel === 'speech-to-speech' ? 'active' : ''}`}
+              onClick={() => switchModel('speech-to-speech')}
+            >
+              <span className="model-icon">🗣️</span>
+              <span className="model-label">Speech to Speech</span>
+            </button>
+          </div>
+          <p className="model-description">{getModelDescription()}</p>
         </div>
         
         <div className="model-container">
@@ -251,6 +280,23 @@ const Home = () => {
             <div className="transcription-container">
               {!transcriptionResult ? (
                 <>
+                  <div className="step-indicator">
+                    <div className={`step ${audioBlob || audioFile ? 'active' : ''}`}>
+                      <div className="step-number">1</div>
+                      <div className="step-text">Input Audio</div>
+                    </div>
+                    <div className={`step-divider ${audioBlob || audioFile ? 'active' : ''}`}></div>
+                    <div className={`step ${audioBlob || audioFile ? 'active' : ''}`}>
+                      <div className="step-number">2</div>
+                      <div className="step-text">Set Languages</div>
+                    </div>
+                    <div className={`step-divider ${audioBlob || audioFile && (sourceLanguage !== 'auto' || targetLanguage !== 'en') ? 'active' : ''}`}></div>
+                    <div className={`step ${audioBlob || audioFile && (sourceLanguage !== 'auto' || targetLanguage !== 'en') ? 'active' : ''}`}>
+                      <div className="step-number">3</div>
+                      <div className="step-text">Transcribe</div>
+                    </div>
+                  </div>
+
                   <div className="tabs">
                     <button
                       className={`tab ${activeTab === 'record' ? 'active' : ''}`}
@@ -287,6 +333,7 @@ const Home = () => {
                         onChange={handleSourceLanguageChange}
                         includeAuto={true}
                       />
+                      <small className="helper-text">The language being spoken in the audio</small>
                     </div>
                     <div className="language-divider">
                       <div className="arrow-icon">
@@ -302,6 +349,7 @@ const Home = () => {
                         onChange={handleTargetLanguageChange}
                         includeAuto={false}
                       />
+                      <small className="helper-text">The language for the transcription output</small>
                     </div>
                   </div>
 
@@ -320,15 +368,24 @@ const Home = () => {
                         "Transcribe Now"
                       )}
                     </button>
+                    <small className="btn-helper-text">{(!audioBlob && !audioFile) ? "Record or upload audio first" : "Click to start transcription"}</small>
                   </div>
                 </>
               ) : (
-                <TranscriptionResult
-                  result={transcriptionResult}
-                  sourceLanguage={sourceLanguage}
-                  targetLanguage={targetLanguage}
-                  onReset={resetTranscription}
-                />
+                <>
+                  <div className="result-header">
+                    <h3>Transcription Results</h3>
+                    <button className="btn btn-outline" onClick={resetTranscription}>
+                      <span className="btn-icon">↩️</span> New Transcription
+                    </button>
+                  </div>
+                  <TranscriptionResult
+                    result={transcriptionResult}
+                    sourceLanguage={sourceLanguage}
+                    targetLanguage={targetLanguage}
+                    onReset={resetTranscription}
+                  />
+                </>
               )}
             </div>
           )}
@@ -336,6 +393,23 @@ const Home = () => {
           {/* Text to Speech Model */}
           {activeModel === 'text-to-speech' && (
             <div className="text-to-speech-container">
+              <div className="step-indicator">
+                <div className={`step ${inputText ? 'active' : ''}`}>
+                  <div className="step-number">1</div>
+                  <div className="step-text">Enter Text</div>
+                </div>
+                <div className={`step-divider ${inputText ? 'active' : ''}`}></div>
+                <div className={`step ${inputText && targetLanguage !== 'en' ? 'active' : ''}`}>
+                  <div className="step-number">2</div>
+                  <div className="step-text">Choose Language</div>
+                </div>
+                <div className={`step-divider ${inputText && targetLanguage !== 'en' ? 'active' : ''}`}></div>
+                <div className={`step ${inputText && inputText.length > 0 ? 'active' : ''}`}>
+                  <div className="step-number">3</div>
+                  <div className="step-text">Generate</div>
+                </div>
+              </div>
+
               <div className="text-input-section">
                 <h3>Enter text to convert to speech</h3>
                 <textarea
@@ -345,6 +419,7 @@ const Home = () => {
                   onChange={handleInputTextChange}
                   rows={6}
                 ></textarea>
+                <small className="character-count">{inputText.length} characters</small>
               </div>
 
               <div className="language-options">
@@ -355,6 +430,7 @@ const Home = () => {
                     onChange={handleTargetLanguageChange}
                     includeAuto={false}
                   />
+                  <small className="helper-text">Select the language for the generated speech</small>
                 </div>
               </div>
 
@@ -373,12 +449,23 @@ const Home = () => {
                     "Generate Speech"
                   )}
                 </button>
+                <small className="btn-helper-text">{!inputText.trim() ? "Enter some text first" : "Click to convert text to speech"}</small>
               </div>
 
               {generatedAudio && (
                 <div className="audio-result">
                   <h3>Generated Speech</h3>
-                  <audio controls src={generatedAudio} className="audio-player" />
+                  <div className="audio-player-container">
+                    <audio controls src={generatedAudio} className="audio-player" />
+                    <div className="audio-controls">
+                      <button className="btn btn-icon" onClick={() => document.querySelector('.audio-player').play()}>
+                        <span className="btn-icon">▶️</span>
+                      </button>
+                      <button className="btn btn-icon" onClick={() => document.querySelector('.audio-player').pause()}>
+                        <span className="btn-icon">⏸️</span>
+                      </button>
+                    </div>
+                  </div>
                   <div className="action-button mt-4">
                     <button className="btn btn-secondary full-width" onClick={() => setGeneratedAudio(null)}>
                       Reset
@@ -392,6 +479,23 @@ const Home = () => {
           {/* Speech to Speech Model */}
           {activeModel === 'speech-to-speech' && (
             <div className="speech-to-speech-container">
+              <div className="step-indicator">
+                <div className={`step ${audioBlob || audioFile ? 'active' : ''}`}>
+                  <div className="step-number">1</div>
+                  <div className="step-text">Input Audio</div>
+                </div>
+                <div className={`step-divider ${audioBlob || audioFile ? 'active' : ''}`}></div>
+                <div className={`step ${audioBlob || audioFile ? 'active' : ''}`}>
+                  <div className="step-number">2</div>
+                  <div className="step-text">Set Languages</div>
+                </div>
+                <div className={`step-divider ${audioBlob || audioFile && (sourceLanguage !== 'auto' || targetLanguage !== 'en') ? 'active' : ''}`}></div>
+                <div className={`step ${audioBlob || audioFile && (sourceLanguage !== 'auto' || targetLanguage !== 'en') ? 'active' : ''}`}>
+                  <div className="step-number">3</div>
+                  <div className="step-text">Translate</div>
+                </div>
+              </div>
+
               <div className="tabs">
                 <button
                   className={`tab ${activeTab === 'record' ? 'active' : ''}`}
@@ -428,6 +532,7 @@ const Home = () => {
                     onChange={handleSourceLanguageChange}
                     includeAuto={true}
                   />
+                  <small className="helper-text">The language being spoken</small>
                 </div>
                 <div className="language-divider">
                   <div className="arrow-icon">
@@ -443,6 +548,7 @@ const Home = () => {
                     onChange={handleTargetLanguageChange}
                     includeAuto={false}
                   />
+                  <small className="helper-text">The language to translate to</small>
                 </div>
               </div>
 
@@ -461,12 +567,23 @@ const Home = () => {
                     "Translate Speech"
                   )}
                 </button>
+                <small className="btn-helper-text">{(!audioBlob && !audioFile) ? "Record or upload audio first" : "Click to translate speech"}</small>
               </div>
 
               {translatedAudio && (
                 <div className="audio-result">
                   <h3>Translated Speech</h3>
-                  <audio controls src={translatedAudio} className="audio-player" />
+                  <div className="audio-player-container">
+                    <audio controls src={translatedAudio} className="audio-player" />
+                    <div className="audio-controls">
+                      <button className="btn btn-icon" onClick={() => document.querySelector('.audio-player').play()}>
+                        <span className="btn-icon">▶️</span>
+                      </button>
+                      <button className="btn btn-icon" onClick={() => document.querySelector('.audio-player').pause()}>
+                        <span className="btn-icon">⏸️</span>
+                      </button>
+                    </div>
+                  </div>
                   <div className="action-button mt-4">
                     <button className="btn btn-secondary full-width" onClick={() => setTranslatedAudio(null)}>
                       Reset
@@ -480,6 +597,7 @@ const Home = () => {
           {/* Error display (for all models) */}
           {error && (
             <div className="error-message">
+              <span className="error-icon">⚠️</span>
               {error}
             </div>
           )}
@@ -487,13 +605,6 @@ const Home = () => {
       </section>
 
       <section className="features-section">
-        <div className="section-header">
-          <h2 className="section-title">Features</h2>
-          <p className="section-subtitle">
-            Powerful AI voice solutions at your fingertips
-          </p>
-        </div>
-
         <div className="features-grid">
           <div className="feature-card">
             <div className="feature-icon">
